@@ -82,21 +82,25 @@ class Graph {
   createLink(follower, followed) {
     let add_link = new Link(followed.name, follower.name);
     this.links.push(add_link);
-    if (this.simulation) {
-      this.simulation.update_network(follower, add_link, "ADD_LINK");
-    }
+    // if (this.simulation) {
+    //   this.simulation.update_network(follower, add_link, "ADD_LINK");
+    // }
     return add_link;
   }
 
-  deleteLink(follower, followed) {
-    let del_link = this.findLink(follower, followed);
-    if (del_link) {
-      if (this.simulation) {
-        this.simulation.update_network(follower, del_link, "DEL_LINK");
-      }
-      this.links.splice(this.links.indexOf(del_link), 1);
-      return del_link;
-    }
+  // deleteLink(follower, followed) {
+  //   let del_link = this.findLink(follower, followed);
+  //   if (del_link) {
+  //     if (this.simulation) {
+  //       this.simulation.update_network(follower, del_link, "DEL_LINK");
+  //     }
+  //     this.links.splice(this.links.indexOf(del_link), 1);
+  //     return del_link;
+  //   }
+  // }
+
+  removeLink(link) {
+    this.links.splice(this.links.indexOf(link), 1);
   }
 
   /**
@@ -107,22 +111,43 @@ class Graph {
     let t_node = this.nodes[getRandomInt(0, this.nodes.length - 1)];
     t_node.readPosts();
     t_node.sendPost();
-    // randomly unfollow a discordant node, and randomly follow a new node within tolerance
+    // randomly randomly follow a new node within tolerance, and unfollow a discordant node
     if (Math.random() < rewire) {
-      let unfollow_node = t_node.unfollowRandom();
-      if (unfollow_node) this.deleteLink(t_node, unfollow_node);
+      let actions = [];
+      let new_followed;
+      let unfollow_node;
       let other_nodes = this.nodes.filter((n) => {
         return (
           Math.abs(n.opinion - t_node.opinion) <= tolerance &&
           !t_node.isFollowing(n)
         );
       });
-      let new_followed;
+
       if (other_nodes.length > 0) {
         new_followed = other_nodes[getRandomInt(0, other_nodes.length - 1)];
         t_node.follow(new_followed);
-        this.createLink(t_node, new_followed);
+        let add_link = this.createLink(t_node, new_followed);
+        actions.push([add_link, "ADD_LINK"]);
       }
+
+      unfollow_node = t_node.unfollowRandom();
+      let del_link;
+      if (unfollow_node) {
+        // this.deleteLink(t_node, unfollow_node);
+        del_link = this.findLink(t_node, unfollow_node);
+        if (del_link) {
+          actions.push([del_link, "DEL_LINK"]);
+        }
+      }
+
+      if (this.simulation) {
+        this.simulation.update_network(t_node, actions);
+      }
+
+      if (del_link) {
+        this.removeLink(del_link);
+      }
+
       demoChat.log(
         transJS("Unfollow", {
           "t_node.name": t_node.name,

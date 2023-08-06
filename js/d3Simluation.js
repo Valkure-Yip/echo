@@ -42,7 +42,7 @@ class D3Simulation {
     this.svgLinks;
   }
 
-  update_network(t_node, t_link, action) {
+  update_network(t_node, actions) {
     this.simulation.force("link").links(this.links);
     // safari doesn't allow assigning parameter default value.
     this.svg.selectAll("line.link, circle.node").remove();
@@ -86,16 +86,18 @@ class D3Simulation {
     if (t_node) {
       this.svgNodes._groups[0][t_node.index].style.fill = "black";
     }
-    if (t_link) {
-      // highlight the removed link and new link.
-      if (action === "DEL_LINK") {
-        this.svgLinks._groups[0][t_link.index].style.strokeDasharray = "5, 5";
-        this.svgLinks._groups[0][t_link.index].style.strokeOpacity = 1;
-        this.svgLinks._groups[0][t_link.index].style.strokeWidth = 2;
-      } else if (action === "ADD_LINK") {
-        this.svgLinks._groups[0][t_link.index].style.strokeOpacity = 1;
-        this.svgLinks._groups[0][t_link.index].style.strokeWidth = 2;
-      }
+    if (actions && actions.length > 0) {
+      actions.forEach(([t_link, action]) => {
+        // highlight the removed link and new link.
+        if (action === "DEL_LINK") {
+          this.svgLinks._groups[0][t_link.index].style.strokeDasharray = "5, 5";
+          this.svgLinks._groups[0][t_link.index].style.strokeOpacity = 1;
+          this.svgLinks._groups[0][t_link.index].style.strokeWidth = 2;
+        } else if (action === "ADD_LINK") {
+          this.svgLinks._groups[0][t_link.index].style.strokeOpacity = 1;
+          this.svgLinks._groups[0][t_link.index].style.strokeWidth = 2;
+        }
+      });
     }
     this.simulation.alpha(0.1);
     this.simulation.restart();

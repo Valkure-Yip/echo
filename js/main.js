@@ -101,9 +101,9 @@ function default_para() {
 
 function runStep() {
   if (running === 1) {
+    graph.runStep();
+    demoChat.show();
     timeout = setTimeout(() => {
-      graph.runStep();
-      demoChat.show();
       runStep();
     }, time_interval);
   }
