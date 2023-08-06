@@ -70,6 +70,7 @@ class Graph {
 
     if (this.simulation) {
       this.simulation.reset(this.nodes, this.links);
+      this.simulation.update_strength(this.avg_deviation);
     }
   }
 
