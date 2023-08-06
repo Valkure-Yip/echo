@@ -1,13 +1,3 @@
-var demoChat = {
-  log(msg) {
-    $("#demo-chatting").append(msg + "<br/>");
-    console.log(msg);
-  },
-  clear() {
-    $("#demo-chatting").html("");
-  },
-};
-
 class Graph {
   constructor() {
     this.nodes = [];
@@ -33,6 +23,7 @@ class Graph {
   // }
 
   get avg_deviation() {
+    if (this.nodes.length === 0) return 0;
     return (
       this.nodes.reduce((sum, n) => {
         return sum + n.avg_deviation_l2;
@@ -67,7 +58,7 @@ class Graph {
     this.nodes.forEach((n, i) => {
       this.nodes
         .filter((m, j) => {
-          return i != j && Math.random() < 0.01;
+          return i != j && Math.random() < 0.05;
         })
         .forEach((m) => {
           n.follow(m);
@@ -82,18 +73,23 @@ class Graph {
     }
   }
 
+  findLink(follower, followed) {
+    return this.links.find((l) => {
+      return l.source.name == followed.name && l.target.name == follower.name;
+    });
+  }
+
   createLink(follower, followed) {
     let add_link = new Link(followed.name, follower.name);
     this.links.push(add_link);
     if (this.simulation) {
       this.simulation.update_network(follower, add_link, "ADD_LINK");
     }
+    return add_link;
   }
 
   deleteLink(follower, followed) {
-    let del_link = this.links.find((l) => {
-      return l.source.name == followed.name && l.target.name == follower.name;
-    });
+    let del_link = this.findLink(follower, followed);
     if (del_link) {
       if (this.simulation) {
         this.simulation.update_network(follower, del_link, "DEL_LINK");
@@ -107,10 +103,6 @@ class Graph {
    * run the simulation for 1 step
    */
   runStep() {
-    if (running == 0) {
-      return;
-    }
-    console.log("run step");
     // randomly pick a node to interact
     let t_node = this.nodes[getRandomInt(0, this.nodes.length - 1)];
     t_node.readPosts();
@@ -134,7 +126,7 @@ class Graph {
       demoChat.log(
         transJS("Unfollow", {
           "t_node.name": t_node.name,
-          "del_node.name": unfollow_node.name,
+          "del_node.name": unfollow_node ? unfollow_node.name : "",
           "add_node.name": new_followed.name,
         }) + "<br/>"
       );
@@ -173,6 +165,7 @@ class Node {
    * average opinion difference between the node and the nodes it follows
    */
   get avg_deviation() {
+    if (this.following.length === 0) return 0;
     return (
       this.following.reduce((sum, n) => {
         return sum + Math.abs(n.opinion - this.opinion);
@@ -181,6 +174,7 @@ class Node {
   }
 
   get avg_deviation_l2() {
+    if (this.following.length === 0) return 0;
     return Math.sqrt(
       this.following.reduce((sum, n) => {
         return sum + Math.pow(n.opinion - this.opinion, 2);

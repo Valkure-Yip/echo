@@ -36,7 +36,7 @@ class D3Simulation {
           .distance(10)
           .strength(0.1)
       )
-      .force("charge", d3.forceManyBody().strength(-73))
+      .force("charge", d3.forceManyBody().strength(-50))
       .force("center", d3.forceCenter(this.width / 2, this.height / 2));
     this.svgNodes;
     this.svgLinks;
@@ -66,7 +66,7 @@ class D3Simulation {
       .append("circle")
       .attr("class", "node")
       .attr("r", function (d) {
-        return 2 * Math.sqrt(d.k) + 1;
+        return 2 * Math.sqrt(d.k) + 2;
       })
       .style("fill", function (d) {
         return colors(d.opinion);

@@ -39,31 +39,35 @@ $("#stop-button").click(stop_all);
 $("#reset-button").click(reset_all);
 $("#default-button").click(default_para);
 
-var interval = setInterval(() => {
-  graph.runStep();
-}, time_interval);
+var timeout;
 
-interval;
-
-function showChatting() {
-  // Prior to getting your chatting.
-  var chatting = document.getElementById("demo-chatting");
-  var shouldScroll =
-    chatting.scrollTop + chatting.clientHeight === chatting.scrollHeight;
-  // After getting your chatting.
-  if (!shouldScroll) {
-    chatting.scrollTop = chatting.scrollHeight;
-  }
-}
+var demoChat = {
+  log(msg) {
+    $("#demo-chatting").append(msg + "<br/>");
+  },
+  clear() {
+    $("#demo-chatting").html("");
+  },
+  show() {
+    // Prior to getting your chatting.
+    var chatting = document.getElementById("demo-chatting");
+    var shouldScroll =
+      chatting.scrollTop + chatting.clientHeight === chatting.scrollHeight;
+    // After getting your chatting.
+    if (!shouldScroll) {
+      chatting.scrollTop = chatting.scrollHeight;
+    }
+  },
+};
 
 function update_speed() {
   p = Number($(this).val());
-  clearInterval(interval);
+  // clearInterval(interval);
   time_interval = slowest_time - p;
-  interval = setInterval(() => {
-    graph.runStep();
-    showChatting();
-  }, time_interval);
+  // interval = setInterval(() => {
+  //   graph.runStep();
+  //   demoChat.show();
+  // }, time_interval);
 }
 
 function get_parameters() {
@@ -95,8 +99,19 @@ function default_para() {
   rewire = 0.9;
 }
 
+function runStep() {
+  if (running === 1) {
+    timeout = setTimeout(() => {
+      graph.runStep();
+      demoChat.show();
+      runStep();
+    }, time_interval);
+  }
+}
+
 function start_all() {
   running = 1;
+  runStep();
   // $("#start-text").fadeOut();
 }
 
@@ -108,6 +123,7 @@ function stop_all() {
 function reset_all() {
   stop_all();
   graph.reset();
+  demoChat.clear();
   // $("#start-text").fadeIn();
 }
 
