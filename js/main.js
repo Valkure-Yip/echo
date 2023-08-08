@@ -25,7 +25,8 @@ var n = 100, // number of nodes
 
 const graph = new Graph();
 const d3Simulation = new D3Simulation();
-graph.use(d3Simulation);
+const plot = new Plot();
+graph.use(d3Simulation, plot);
 
 $("#speed").on("change", update_speed);
 $("#soflow-t").on("change", update_para);
@@ -110,6 +111,7 @@ function runStep() {
 }
 
 function start_all() {
+  if (running === 1) return;
   running = 1;
   runStep();
   // $("#start-text").fadeOut();

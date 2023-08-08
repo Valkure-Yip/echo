@@ -2,10 +2,12 @@ class Graph {
   constructor() {
     this.nodes = [];
     this.links = [];
+    this.count = 0;
     /**
      * @type {D3Simulation}
      */
     this.simulation;
+    this.plot;
     this.reset();
   }
 
@@ -41,9 +43,11 @@ class Graph {
    * ): update the graph, add/del links
    * - update_strength(avg_deviation): update the strength of the repulsive force
    */
-  use(simulation) {
+  use(simulation, plot) {
     this.simulation = simulation;
     this.simulation.reset(this.nodes, this.links);
+    this.plot = plot;
+    this.plot.reset(this.nodes);
   }
 
   /**
@@ -55,6 +59,7 @@ class Graph {
       return new Node(i, genRandomValue(range_min, range_max));
     });
     this.links = [];
+    this.count = 0;
     this.nodes.forEach((n, i) => {
       this.nodes
         .filter((m, j) => {
@@ -71,6 +76,9 @@ class Graph {
     if (this.simulation) {
       this.simulation.reset(this.nodes, this.links);
       this.simulation.update_strength(this.avg_deviation);
+    }
+    if (this.plot) {
+      this.plot.reset(this.nodes);
     }
   }
 
@@ -108,6 +116,7 @@ class Graph {
    * run the simulation for 1 step
    */
   runStep() {
+    this.count++;
     // randomly pick a node to interact
     let t_node = this.nodes[getRandomInt(0, this.nodes.length - 1)];
     t_node.readPosts();
@@ -163,6 +172,7 @@ class Graph {
         this.simulation.update_strength(this.avg_deviation);
       }
     }
+    this.plot.update_plot(this.count);
   }
 }
 
