@@ -16,6 +16,8 @@ var slowest_time = 200;
 var remove_link = false;
 var time_interval = slowest_time - Number($("#speed").val()),
   post = 0.4;
+var censor_range = [1, 1];
+var censor_strength = 0.5;
 
 var tolerance, learning, rewire;
 get_parameters();
@@ -29,6 +31,8 @@ const plot = new Plot();
 graph.use(d3Simulation, plot);
 
 $("#speed").on("change", update_speed);
+$("#censor-range").on("change", update_censor_range);
+$("#censor-strength").on("change", update_censor_strength);
 $("#soflow-t").on("change", update_para);
 $("#soflow-i").on("change", update_para);
 $("#soflow-u").on("change", update_para);
@@ -69,6 +73,16 @@ function update_speed() {
   //   graph.runStep();
   //   demoChat.show();
   // }, time_interval);
+}
+
+function update_censor_range() {
+  p = -Number($(this).val());
+  censor_range = [p, 1];
+}
+
+function update_censor_strength() {
+  p = Number($(this).val());
+  censor_strength = p / 100;
 }
 
 function get_parameters() {

@@ -277,6 +277,12 @@ class Node {
     this._concordant_nodes = [];
     this._discordant_nodes = [];
     for (let i in this.following) {
+      let censored =
+        this.following[i].msg_opinion > censor_range[0] &&
+        this.following[i].msg_opinion < censor_range[1] &&
+        Math.random() < censor_strength;
+      // can not read msg from censored nodes
+      if (censored) continue;
       if (Math.abs(this.opinion - this.following[i].msg_opinion) <= tolerance) {
         this._concordant_nodes.push(this.following[i]);
       } else {
@@ -291,13 +297,26 @@ class Node {
    * according to probability this.post
    */
   sendPost() {
+    // let censored =
+    //   this.opinion > censor_range[0] &&
+    //   this.opinion < censor_range[1] &&
+    //   Math.random() < censor_strength;
+    // // do not send msg if censored
+    // if (censored) {
+    //   demoChat.log(
+    //     `User ${this.name} (opinion: ${this.opinion.toFixed(
+    //       1
+    //     )}) is censored\n\n`
+    //   );
+    //   return;
+    // }
     if (this._concordant_nodes.length == 0) {
       // no concordant nodes, just post a new message
       this.msg_opinion = this.opinion;
       demoChat.log(
         transJS("PostMessage", { "t_node.name": this.name }) + "<br/>"
       );
-      return this;
+      return;
     }
     if (Math.random() < this.post) {
       // post a msg reflecting its updated opinion;
